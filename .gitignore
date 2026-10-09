@@ -1,0 +1,21 @@
+node_modules/
+dist/
+.cloudflare/
+.wrangler/
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example
+*.log
+.DS_Store
+
+# demo/: keep the scripts, not the media
+demo/raw/
+demo/seg/
+demo/frames/
+demo/out/
+demo/ui/
+demo/preview/
+demo/check/
+demo/tweets/
+demo/scenes.json

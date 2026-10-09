@@ -1,0 +1,171 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<style>
+  :root {
+    --bg: #1b1410; --panel: #261c16; --line: #4a382c; --text: #fbf3ea; --muted: #bda997;
+    --orange: #f6821f; --orange2: #fbad41; --sub: #ffe14d; --heard: #8b7bff; --saw: #4cc3ff;
+    font-family: ui-rounded, "SF Pro Rounded", system-ui, -apple-system, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 1080px; height: 1920px; background: transparent; overflow: hidden; color: var(--text); }
+  #root { position: relative; width: 1080px; height: 1920px; }
+  .abs { position: absolute; }
+
+  /* Clip scene: opaque frame with a transparent window where ffmpeg places the video. */
+  .frame-top { left: 0; top: 0; width: 1080px; height: 250px; background: var(--bg); }
+  .frame-bot { left: 0; top: 1330px; width: 1080px; height: 590px; background: var(--bg); }
+  .window-edge { left: 0; top: 250px; width: 1080px; height: 1080px; box-shadow: inset 0 0 0 0 transparent; }
+  .vignette { left: 0; top: 1050px; width: 1080px; height: 280px; background: linear-gradient(transparent, rgba(0,0,0,.6)); }
+
+  .brand { left: 48px; top: 40px; display: flex; gap: 16px; align-items: center; }
+  .pill { background: var(--orange); color: #1b1004; font-weight: 900; font-size: 28px; letter-spacing: .08em; padding: 10px 20px; border-radius: 999px; }
+  .by { color: var(--muted); font-size: 28px; font-weight: 700; }
+  .headline { left: 48px; right: 48px; top: 112px; font-size: 62px; line-height: 1.04; font-weight: 900; letter-spacing: -.02em; }
+  .headline em { font-style: normal; color: var(--orange2); }
+
+  .scan { left: 0; width: 1080px; height: 6px; background: linear-gradient(90deg, transparent, var(--orange2), transparent); box-shadow: 0 0 40px 12px rgba(246,130,31,.55); }
+  .listening { left: 50%; top: 740px; transform: translateX(-50%); background: rgba(0,0,0,.72); border: 2px solid rgba(255,255,255,.18);
+    padding: 18px 30px; border-radius: 999px; font-size: 34px; font-weight: 800; display: flex; gap: 22px; align-items: center; white-space: nowrap; }
+  .listening .dot { width: 18px; height: 18px; border-radius: 50%; background: #e5383b; }
+  .listening .tag { font-size: 26px; padding: 6px 14px; border-radius: 999px; border: 2px solid; }
+  .listening .tag.h { border-color: var(--heard); color: #c9c1ff; }
+  .listening .tag.s { border-color: var(--saw); color: #b4e7ff; }
+
+  .subtitle { left: 40px; right: 40px; bottom: 612px; text-align: center; font-weight: 900; font-size: 58px; line-height: 1.14; color: #fff;
+    -webkit-text-stroke: 10px #000; paint-order: stroke fill; text-shadow: 0 6px 30px rgba(0,0,0,.6); }
+  .subtitle .who { display: block; color: var(--sub); font-size: 36px; letter-spacing: .12em; margin-bottom: 8px; -webkit-text-stroke: 8px #000; }
+
+  .verdict { left: 48px; right: 48px; top: 1368px; display: flex; justify-content: space-between; align-items: baseline; }
+  .verdict .need { font-size: 76px; font-weight: 900; color: var(--orange2); letter-spacing: -.02em; }
+  .verdict .p { font-size: 76px; font-weight: 900; font-variant-numeric: tabular-nums; }
+  .bars { left: 48px; right: 48px; top: 1478px; }
+  .bar { display: grid; grid-template-columns: 330px 1fr 110px; gap: 20px; align-items: center; height: 58px; font-size: 36px; }
+  .bar .track { height: 22px; border-radius: 999px; background: #33261e; overflow: hidden; }
+  .bar .fill { height: 100%; border-radius: inherit; background: #5a4535; }
+  .bar.top .fill { background: linear-gradient(90deg, var(--orange), var(--orange2)); }
+  .bar.top .lbl { font-weight: 900; }
+  .bar .pct { text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; font-weight: 700; }
+  .bar.top .pct { color: var(--text); }
+
+  .evidence { left: 48px; right: 48px; top: 1680px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .ev { border-radius: 24px; padding: 16px 22px; background: var(--panel); border: 3px solid; }
+  .ev.h { border-color: var(--heard); }
+  .ev.s { border-color: var(--saw); }
+  .ev .k { font-size: 24px; font-weight: 900; letter-spacing: .14em; }
+  .ev.h .k { color: #c9c1ff; } .ev.s .k { color: #b4e7ff; }
+  .ev .v { font-size: 38px; font-weight: 800; margin-top: 2px; white-space: nowrap; }
+  .ev .v b { color: var(--orange2); font-variant-numeric: tabular-nums; }
+  .footer { left: 48px; right: 48px; top: 1832px; font-size: 25px; color: var(--muted); display: flex; justify-content: space-between; }
+  .footer b { color: var(--text); }
+
+  .skel { background: #2c211a; border-radius: 16px; }
+
+  /* Outro */
+  .outro { left: 0; top: 0; width: 1080px; height: 1920px; background: radial-gradient(900px 700px at 50% 0%, rgba(246,130,31,.35), transparent 70%), var(--bg); }
+  .o-title { left: 0; right: 0; top: 110px; text-align: center; font-size: 92px; line-height: 1.02; font-weight: 900; letter-spacing: -.03em; }
+  .o-title em { font-style: normal; color: var(--orange); }
+  .phone { left: 50%; top: 360px; width: 560px; height: 1060px; transform: translateX(-50%); border-radius: 56px; overflow: hidden;
+    border: 10px solid #3a2c22; box-shadow: 0 40px 120px rgba(0,0,0,.6), 0 0 0 2px #5a4535; background: var(--bg); }
+  .phone img { width: 100%; display: block; }
+  .o-sub { left: 0; right: 0; top: 1480px; text-align: center; }
+  .o-sub .a { font-size: 50px; font-weight: 900; }
+  .o-sub .b { font-size: 32px; color: var(--muted); margin-top: 14px; font-weight: 700; }
+  .o-sub .c { display: inline-block; margin-top: 26px; font-size: 32px; font-weight: 900; color: #1b1004; background: var(--orange2); padding: 12px 26px; border-radius: 999px; font-family: ui-monospace, Menlo, monospace; }
+  .credits { left: 0; right: 0; top: 1840px; text-align: center; font-size: 22px; color: #8d7a6a; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+  const ease = (x) => 1 - Math.pow(1 - clamp(x), 3);
+  const back = (x) => { x = clamp(x); const c = 1.7; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+  const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]);
+  const pct = (p) => `${Math.round(p * 100)}%`;
+  const REVEAL = 1.0; // seconds of "listening + watching" before the decision lands
+
+  function clipScene(s, t) {
+    const r = clamp((t - REVEAL) / 0.6);       // panel reveal progress
+    const er = ease(r);
+    const sub = back((t - REVEAL - 0.25) / 0.35); // subtitle pop
+    const headline = s.hook && t < s.hookUntil ? s.hook : s.headline;
+    const scanning = t < REVEAL + 0.15;
+    const scanY = 250 + ((t * 1.6) % 1) * 1080;
+    let html = `
+      <div class="abs frame-top"></div>
+      <div class="abs frame-bot"></div>
+      <div class="abs vignette" style="opacity:${er}"></div>
+      <div class="abs brand"><span class="pill">PET TRANSLATOR</span><span class="by">powered by Clef-omni</span></div>
+      <div class="abs headline">${headline}</div>`;
+
+    if (scanning) {
+      const fade = 1 - clamp((t - REVEAL) / 0.15);
+      html += `<div class="abs scan" style="top:${scanY}px;opacity:${fade}"></div>
+        <div class="abs listening" style="opacity:${fade}">
+          <span class="dot" style="opacity:${0.4 + 0.6 * Math.abs(Math.sin(t * 6))}"></span>
+          Translating <span class="tag h">listening</span><span class="tag s">watching</span>
+        </div>`;
+      // skeleton panel
+      html += `<div class="abs skel" style="left:48px;top:1380px;width:520px;height:70px;opacity:${0.6 + 0.3 * Math.sin(t * 8)}"></div>
+        ${[0, 1, 2].map((i) => `<div class="abs skel" style="left:48px;top:${1490 + i * 58}px;width:984px;height:30px;opacity:${0.5 + 0.3 * Math.sin(t * 8 + i)}"></div>`).join("")}
+        <div class="abs skel" style="left:48px;top:1680px;width:482px;height:120px;opacity:.5"></div>
+        <div class="abs skel" style="left:550px;top:1680px;width:482px;height:120px;opacity:.5"></div>`;
+    }
+
+    if (t >= REVEAL) {
+      const top = s.bars[0];
+      html += `
+        <div class="abs verdict" style="opacity:${er};transform:translateY(${(1 - er) * 30}px)">
+          <span class="need">${esc(top.label)}</span><span class="p">${pct(top.p * er)}</span>
+        </div>
+        <div class="abs bars" style="opacity:${er}">
+          ${s.bars.map((b, i) => {
+            const g = ease(clamp((t - REVEAL - 0.1 - i * 0.08) / 0.7));
+            return `<div class="bar ${i === 0 ? "top" : ""}"><span class="lbl">${esc(b.label)}</span>
+              <span class="track"><span class="fill" style="display:block;width:${Math.max(2, b.p * 100 * g)}%"></span></span>
+              <span class="pct">${pct(b.p * g)}</span></div>`;
+          }).join("")}
+        </div>
+        <div class="abs evidence">
+          ${[["h", "HEARD", s.heard], ["s", "SAW", s.saw]].map(([k, name, ev], i) => {
+            const e = ease(clamp((t - REVEAL - 0.35 - i * 0.12) / 0.4));
+            return `<div class="ev ${k}" style="opacity:${e};transform:translateY(${(1 - e) * 24}px)"><div class="k">${name}</div><div class="v">${esc(ev[0])} <b>${ev[1]}</b></div></div>`;
+          }).join("")}
+        </div>
+        <div class="abs footer" style="opacity:${ease(clamp((t - REVEAL - 0.6) / 0.4))}">
+          <span><b>1 API call</b> · video + audio · ${s.tokens.toLocaleString()} tokens · ${s.cost}</span>
+          <span>${esc(s.credit)}</span>
+        </div>`;
+    }
+
+    if (t >= REVEAL + 0.25) {
+      html += `<div class="abs subtitle" style="opacity:${clamp(sub * 1.5)};transform:scale(${0.85 + 0.15 * sub})">
+        <span class="who">${esc(s.speaker.toUpperCase())}</span>${esc(s.caption)}</div>`;
+    }
+    return html;
+  }
+
+  function outroScene(s, t) {
+    const a = ease(t / 0.5), b = ease((t - 0.25) / 0.7), c = ease((t - 0.7) / 0.5), d = ease((t - 1.1) / 0.5);
+    return `
+      <div class="abs outro"></div>
+      <div class="abs o-title" style="opacity:${a};transform:translateY(${(1 - a) * 30}px)">One model.<br/>Watches <em>and</em> listens.</div>
+      <div class="abs phone" style="opacity:${b};transform:translateX(-50%) translateY(${(1 - b) * 120}px) scale(${0.94 + 0.06 * b})">
+        <img src="${s.ui}" style="transform:translateY(${-Math.max(0, t - 1.4) * 70}px)" />
+      </div>
+      <div class="abs o-sub" style="opacity:${c}">
+        <div class="a">Clef-omni on Cloudflare Workers AI</div>
+        <div class="b">Video + audio in. Calibrated decisions out. 0 tokens generated.</div>
+        <div class="c" style="opacity:${d}">built with: npx cf dev</div>
+      </div>
+      <div class="abs credits" style="opacity:${c}">${esc(s.credits)}</div>`;
+  }
+
+  window.renderFrame = (s, t) => {
+    document.getElementById("root").innerHTML = s.type === "outro" ? outroScene(s, t) : clipScene(s, t);
+  };
+</script>
+</body>
+</html>

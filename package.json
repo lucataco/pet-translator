@@ -1,0 +1,28 @@
+{
+  "name": "pet-translator",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Find out what your pet is really saying. A Clef-omni demo on Cloudflare Workers AI.",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lucataco/pet-translator.git"
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "cf dev",
+    "build": "cf build",
+    "deploy": "cf deploy",
+    "typecheck": "cf workers types && tsc --noEmit"
+  },
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "beta",
+    "@types/node": "^26.6.5",
+    "cf": "^1.0.0-beta.14",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.4"
+  },
+  "allowScripts": {
+    "workerd@1.20261006.1": true
+  }
+}

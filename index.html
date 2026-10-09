@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Pet Translator · What is your pet really saying?</title>
+    <meta name="description" content="Record your pet. Clef-omni listens and watches at the same time and tells you what they're really saying." />
+    <meta property="og:title" content="Pet Translator" />
+    <meta property="og:description" content="Record your pet. Find out what they're really saying. Powered by Clef-omni on Workers AI." />
+    <meta name="theme-color" content="#1b1410" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='40' r='14' fill='%23f6821f'/%3E%3Ccircle cx='14' cy='24' r='7' fill='%23fbad41'/%3E%3Ccircle cx='26' cy='12' r='7' fill='%23fbad41'/%3E%3Ccircle cx='38' cy='12' r='7' fill='%23fbad41'/%3E%3Ccircle cx='50' cy='24' r='7' fill='%23fbad41'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="/web/style.css" />
+  </head>
+  <body>
+    <main class="wrap">
+      <header class="hero">
+        <div class="badge">Powered by Clef-omni on Workers AI</div>
+        <h1>Pet<span>Translator</span></h1>
+        <p class="sub">Record your pet. One model hears the sound <em>and</em> watches the body language, then tells you what they're really saying.</p>
+      </header>
+
+      <section id="input" class="card">
+        <div class="tabs" role="tablist">
+          <button class="tab-btn active" data-tab="record" role="tab">Record</button>
+          <button class="tab-btn" data-tab="upload" role="tab">Upload</button>
+        </div>
+
+        <div id="tab-record" class="tab">
+          <div class="stage">
+            <video id="preview" playsinline muted autoplay></video>
+            <div id="cam-placeholder" class="placeholder">
+              <p>Point your camera at your pet.<br />Sound on. Barks, meows and purrs all count.</p>
+            </div>
+            <div id="countdown" class="countdown" hidden></div>
+            <div id="rec-dot" class="rec-dot" hidden>REC</div>
+          </div>
+          <div class="row">
+            <button id="cam-btn" class="ghost">Turn on camera</button>
+            <button id="flip-btn" class="ghost" hidden>Flip camera</button>
+            <button id="rec-btn" class="ghost" disabled>Record 8s</button>
+          </div>
+        </div>
+
+        <div id="tab-upload" class="tab" hidden>
+          <label class="drop" id="drop">
+            <input type="file" id="file" accept="video/*,audio/*,image/*" multiple />
+            <strong>Drop a video of your pet</strong>
+            <span>or a photo plus a sound clip. Short clips (5 to 15s) work best.</span>
+          </label>
+          <div id="upload-preview" class="upload-preview"></div>
+        </div>
+
+        <div class="fields">
+          <label>Pet's name <input id="pet-name" placeholder="Biscuit" maxlength="40" autocomplete="off" /></label>
+          <label>Context (optional) <input id="context" placeholder="Dinner is at 6. It's 5:58." maxlength="200" autocomplete="off" /></label>
+        </div>
+
+        <button id="go" class="primary" disabled>Translate</button>
+        <p id="status" class="status" aria-live="polite"></p>
+      </section>
+
+      <section id="result" class="card" hidden>
+        <div id="result-stage" class="stage result-stage">
+          <video id="playback" playsinline controls loop></video>
+          <img id="still" alt="" hidden />
+          <div id="subtitle" class="subtitle"></div>
+        </div>
+
+        <div class="verdict">
+          <div id="verdict-need" class="verdict-need"></div>
+          <div id="verdict-conf" class="verdict-conf"></div>
+        </div>
+
+        <div class="actions">
+          <button id="reroll" class="ghost">Another translation</button>
+          <button id="dl-video" class="primary small">Make shareable video</button>
+          <button id="dl-card" class="ghost">Save card</button>
+          <button id="again" class="ghost">Translate another</button>
+        </div>
+        <div id="export-links" class="export-links"></div>
+
+        <div class="grid">
+          <div>
+            <h3>What they want</h3>
+            <div id="need-bars"></div>
+          </div>
+          <div>
+            <h3>Readings</h3>
+            <div id="meters"></div>
+            <div id="chips" class="chips"></div>
+          </div>
+        </div>
+
+        <div id="stats" class="stats"></div>
+        <p class="fine">
+          No LLM wrote this. Clef-omni is a decision model: one forward pass over video + audio returns calibrated
+          probabilities for 11 questions. We map those decisions to hand-written subtitles. For entertainment only,
+          not veterinary advice.
+        </p>
+      </section>
+
+      <footer>
+        Built on Cloudflare Workers with
+        <a href="https://blog.cloudflare.com/clef-faster-cheaper-multimodal/" target="_blank" rel="noopener">Clef-omni</a>.
+        This app doesn't save your clips.
+      </footer>
+    </main>
+    <script type="module" src="/web/app.js"></script>
+  </body>
+</html>

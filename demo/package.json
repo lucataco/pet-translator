@@ -1,0 +1,16 @@
+{
+  "name": "pet-translator-demo",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "scripts": {
+    "fetch": "./fetch-clips.sh",
+    "translate": "./translate.sh ball '' '' && ./translate.sh fitz Fitz \"I'm trying to read my book\" && ./translate.sh cat '' ''",
+    "capture": "node capture-ui.mjs",
+    "render": "node render.mjs",
+    "build": "./build.sh"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.64.0"
+  }
+}
